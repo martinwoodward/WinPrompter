@@ -163,6 +163,16 @@ WinPrompter uses Windows on-device speech recognition to follow along as you spe
 
 Press **V** or click the mic button in the toolbar to toggle voice mode.
 
+## Design
+
+WinPrompter uses a **floating borderless window** with a distinctive corner style:
+- **Square corners at top** — flush with screen edge when positioned at top
+- **Rounded corners at bottom** — soft, modern appearance
+
+The asymmetric corner styling is achieved using XAML's `CornerRadius="0,0,8,8"` property, providing a professional look while maintaining compatibility with Windows visual effects (drop shadows, acrylic backgrounds).
+
+For details on the design decision and alternative approaches, see [docs/EXECUTIVE_SUMMARY.md](docs/EXECUTIVE_SUMMARY.md).
+
 ## Project Structure
 
 ```
@@ -170,7 +180,14 @@ WinPrompter/
 ├── .github/workflows/    # CI and release workflows
 ├── Assets/
 │   └── Web/              # WebView2 content (HTML/CSS/JS)
-├── docs/                 # Deployment documentation
+├── docs/                 # Documentation
+│   ├── STORE_DEPLOYMENT.md              # Store submission guide
+│   ├── EXECUTIVE_SUMMARY.md             # Corner styling research summary
+│   ├── ROUNDED_CORNERS_RESEARCH.md      # Detailed analysis of options
+│   ├── ROUNDED_CORNERS_IMPLEMENTATION.md # Code samples
+│   ├── CORNER_RADIUS_VISUAL_REFERENCE.md # Visual guide
+│   ├── CORNER_STYLING_COMPARISON.md      # Technical comparison
+│   └── QUICK_START_CORNERS.md            # Developer quick guide
 ├── Helpers/
 │   ├── FuzzyMatcher.cs   # Levenshtein sliding-window matcher
 │   ├── WebViewBridge.cs  # C# ↔ JavaScript interop
