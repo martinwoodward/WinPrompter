@@ -23,6 +23,12 @@ public static partial class WindowHelper
         // Extend content into title bar and collapse it
         appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         appWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Collapsed;
+        
+        // Remove any gray background from title bar by setting all button colors to transparent
+        appWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+        appWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        appWindow.TitleBar.ButtonHoverBackgroundColor = Colors.Transparent;
+        appWindow.TitleBar.ButtonPressedBackgroundColor = Colors.Transparent;
 
         // Hide border and title bar
         if (appWindow.Presenter is OverlappedPresenter presenter)

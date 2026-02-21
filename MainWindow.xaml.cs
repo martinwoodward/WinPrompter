@@ -339,7 +339,10 @@ public sealed partial class MainWindow : Window
         if (_bridge == null) return;
         _vm.TogglePlayPause();
         if (_vm.IsPlaying)
+        {
+            HideOverlay(); // Hide toolbar when countdown starts
             await _bridge.PlayWithCountdownAsync(3);
+        }
         else
             await _bridge.PauseAsync();
         PlayIcon.Glyph = _vm.IsPlaying ? "\uE769" : "\uE768";
@@ -608,7 +611,6 @@ public sealed partial class MainWindow : Window
                 }
                 VoiceStatusText.Text = "Starting voice...";
                 VoiceIndicator.Visibility = Visibility.Visible;
-                ShowOverlay();
 
                 // Capture the last error from the service (fires on background thread)
                 string? lastError = null;
@@ -628,6 +630,7 @@ public sealed partial class MainWindow : Window
                 else
                 {
                     VoiceStatusText.Text = "Listening...";
+                    HideOverlay(); // Hide toolbar when voice activation starts
                 }
             }
         }
