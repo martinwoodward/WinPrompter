@@ -123,12 +123,46 @@ jobs:
           name: msix-arm64
           path: packages/arm64
 
-      - name: Submit to Microsoft Store
-        uses: microsoft/store-submission@v1
+      - name: Locate package to submit
+        id: pkg
+        shell: pwsh
+        run: |
+          # msstore publish takes a single .msixbundle/.msixupload/.msix.
+          # Prefer a bundle, since that is what carries multiple architectures.
+          $pkg = Get-ChildItem -Path packages -Recurse -Include *.msixupload,*.msixbundle | Select-Object -First 1
+          if (-not $pkg) {
+            $msix = @(Get-ChildItem -Path packages -Recurse -Filter *.msix)
+            if ($msix.Count -gt 1) {
+              Write-Error "Found $($msix.Count) .msix files but no .msixbundle. The Store expects a single bundle for multi-architecture submissions - build with -p:AppxBundle=Always (or run makeappx bundle) and re-run."
+              exit 1
+            }
+            $pkg = $msix | Select-Object -First 1
+          }
+          if (-not $pkg) { Write-Error "No package found under packages/"; exit 1 }
+          echo "path=$($pkg.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Set up MSStore CLI
+        uses: microsoft/microsoft-store-apppublisher@cc9910a8d59f2eb55cbb83df0a3800cf3b5300e0 # v1.4
         with:
-          command: UpdateAndSubmit
-          productId: ${{ secrets.STORE_PRODUCT_ID }}
-          tenantId: ${{ secrets.AZURE_TENANT_ID }}
-          clientId: ${{ secrets.AZURE_CLIENT_ID }}
-          clientSecret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          packagePath: packages/
+          version: v0.4.1
+
+      - name: Configure Store Credentials
+        shell: bash
+        env:
+          STORE_SELLER_ID: ${{ secrets.STORE_SELLER_ID }}
+          STORE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          STORE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          STORE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        run: >-
+          msstore reconfigure
+          --tenantId "$STORE_TENANT_ID"
+          --sellerId "$STORE_SELLER_ID"
+          --clientId "$STORE_CLIENT_ID"
+          --clientSecret "$STORE_CLIENT_SECRET"
+
+      - name: Submit to Microsoft Store
+        shell: bash
+        env:
+          STORE_PRODUCT_ID: ${{ secrets.STORE_PRODUCT_ID }}
+          PACKAGE_PATH: ${{ steps.pkg.outputs.path }}
+        run: msstore publish "$PACKAGE_PATH" --appId "$STORE_PRODUCT_ID"
